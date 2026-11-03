@@ -33,7 +33,10 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Start admin app for browser tests
         run: |
-          pnpm dev:admin > /tmp/delupa-admin.log 2>&1 &
+          NUXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54331 \
+            NUXT_PUBLIC_SUPABASE_KEY=test-anon-key \
+            pnpm --filter @delupa/admin exec nuxt dev --port 3001 --host 0.0.0.0 --dotenv false \
+            > /tmp/delupa-admin.log 2>&1 &
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:3001/login > /dev/null; then
               exit 0

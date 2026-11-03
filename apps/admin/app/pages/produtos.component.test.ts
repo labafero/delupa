@@ -1,6 +1,6 @@
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ProductsPage from './produtos.vue'
 
 const { useSupabaseClientMock } = vi.hoisted(() => ({
@@ -10,6 +10,10 @@ const { useSupabaseClientMock } = vi.hoisted(() => ({
 mockNuxtImport('useSupabaseClient', () => useSupabaseClientMock)
 
 describe('admin product form', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   beforeEach(() => {
     useSupabaseClientMock.mockReset()
   })
@@ -19,6 +23,7 @@ describe('admin product form', () => {
     const productRequest = new Promise<never>((_resolve, reject) => {
       rejectRequest = reject
     })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     const query = {
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({ data: [], error: null }),
