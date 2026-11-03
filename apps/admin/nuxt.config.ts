@@ -19,6 +19,10 @@ export default defineNuxtConfig({
       }
     }
   },
+  routeRules: {
+    '/definir-senha': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } }
+  },
   compatibilityDate: '2026-11-03',
   supabase: {
     redirect: false,

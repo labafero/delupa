@@ -22,3 +22,9 @@ export function resolveAppReturnPath(candidate: unknown, fallback = '/'): string
     return fallback
   }
 }
+
+export function getPasswordRecoveryRedirect(origin: string): string {
+  const callbackUrl = new URL('/auth/callback', origin)
+  callbackUrl.searchParams.set('next', '/definir-senha')
+  return callbackUrl.toString()
+}

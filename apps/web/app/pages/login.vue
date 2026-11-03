@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Database } from '@delupa/database/types'
 
-import { resolveAppReturnPath } from '@delupa/auth'
+import { getPasswordRecoveryRedirect, resolveAppReturnPath } from '@delupa/auth'
+
+useSeoMeta({ title: 'Entrar | Delupa', robots: 'noindex, nofollow' })
 
 const route = useRoute()
 const supabase = useSupabaseClient<Database>()
@@ -41,6 +43,25 @@ async function login() {
   }
 
   await navigateTo(resolveAppReturnPath(route.query.next, '/minha-conta'))
+}
+
+async function recoverPassword() {
+  if (!email.value.trim()) {
+    messageKind.value = 'error'
+    message.value = 'Informe seu e-mail para receber o link de definição de senha.'
+    return
+  }
+
+  pending.value = true
+  message.value = ''
+  const { error } = await supabase.auth.resetPasswordForEmail(email.value.trim(), {
+    redirectTo: getPasswordRecoveryRedirect(window.location.origin)
+  })
+  pending.value = false
+  messageKind.value = error ? 'error' : 'info'
+  message.value = error
+    ? 'Não foi possível enviar o link. Confira o e-mail e tente novamente.'
+    : 'Se este e-mail tiver uma conta, enviaremos um link para definir ou redefinir a senha.'
 }
 </script>
 
@@ -94,6 +115,14 @@ async function login() {
           :disabled="pending"
         >
           {{ pending ? 'Entrando…' : 'Entrar' }}
+        </button>
+        <button
+          class="button-link"
+          type="button"
+          :disabled="pending"
+          @click="recoverPassword"
+        >
+          Esqueci minha senha
         </button>
       </form>
 

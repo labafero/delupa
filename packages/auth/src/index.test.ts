@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isAppRole, resolveAppReturnPath } from './index'
+import { getPasswordRecoveryRedirect, isAppRole, resolveAppReturnPath } from './index'
 
 describe('application roles', () => {
   it('accepts only the two supported roles', () => {
@@ -19,5 +19,13 @@ describe('post-login return path', () => {
     expect(resolveAppReturnPath('//evil.example')).toBe('/')
     expect(resolveAppReturnPath('https://evil.example')).toBe('/')
     expect(resolveAppReturnPath('/\\evil.example')).toBe('/')
+  })
+})
+
+describe('password recovery redirect', () => {
+  it('returns the local callback with the password setup route', () => {
+    expect(getPasswordRecoveryRedirect('https://admin.delupa.labafero.com')).toBe(
+      'https://admin.delupa.labafero.com/auth/callback?next=%2Fdefinir-senha'
+    )
   })
 })

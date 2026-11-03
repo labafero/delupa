@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { Database } from '@delupa/database/types'
 
+useDelupaSeoDefaults({
+  title: 'Casal de Lupa na orla de Maceió',
+  description:
+    'Encontre o Casal de Lupa na orla de Maceió e confira cervejas, mangas e outros produtos disponíveis.'
+})
+
 const user = useSupabaseUser()
 const supabase = useSupabaseClient<Database>()
 const products = ref<

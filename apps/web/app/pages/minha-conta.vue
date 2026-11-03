@@ -3,6 +3,8 @@ import type { Database } from '@delupa/database/types'
 
 definePageMeta({ middleware: 'client-auth' })
 
+useSeoMeta({ title: 'Minha conta | Delupa', robots: 'noindex, nofollow' })
+
 const user = useSupabaseUser()
 const supabase = useSupabaseClient<Database>()
 const orders = ref<

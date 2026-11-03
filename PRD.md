@@ -61,6 +61,9 @@
 - A página apresenta nome, descrição curta, imagem/identidade visual, produtos principais (cerveja, manga e sal) e formas de contato aprovadas pelo casal.
 - Conteúdo essencial é legível em celular, com botões e textos em português brasileiro.
 - O app não apresenta estoque como garantido em tempo real no MVP; quando o catálogo transacional for lançado, disponibilidade deve refletir estoque reservável.
+- A página pública apresenta título, descrição e metadados de compartilhamento em português brasileiro, URL canônica e idioma `pt-BR`.
+- `robots.txt` e `sitemap.xml` incluem apenas conteúdo público; login, cadastro, conta, callback e todo o painel administrativo usam `noindex`.
+- Builds de preview e desenvolvimento não devem ser indexados.
 
 #### História 4 — Consultar agenda e microfestas
 
@@ -95,6 +98,7 @@
 **Como** operador(a), **quero** gerenciar produtos e pedidos num admin, **para** controlar preço, estoque, reservas, pagamentos e entregas.
 
 - Admin autenticado permite CRUD básico de produtos e consulta/atualização de pedidos conforme permissões.
+- Convites, cadastro e recuperação de acesso permitem definir ou redefinir a senha dentro do app; rotas de autenticação não são indexáveis.
 - Produto contém nome, descrição, preço público, custo de aquisição privado, quantidade disponível, limite online e estado ativo/arquivado.
 - O admin consegue atualizar custo de aquisição e preço de venda para comprar em atacado, manter margem e repassar preços menores ao cliente; custo e margem nunca aparecem no app público.
 - Atualizações de preço/estoque não alteram silenciosamente um pedido já pago; tratamento para carrinho ainda reservado é informado ao cliente e definido antes do lançamento.
@@ -140,6 +144,7 @@ Proposta lógica: monorepo Nuxt com duas aplicações e módulos compartilhados;
 5. **Persistência:** posição mais recente, perfil/agenda, produtos, estoque, carrinhos com expiração, pedidos e histórico mínimo operacional. Histórico de trilha GPS não é requisito.
 6. **Mapa:** camada OpenStreetMap ou baseada em dados OSM para ilustração; o pin pode abrir aplicativo de mapas nativo ou Google Maps. A navegação é opcional, pois cliente e casal podem se encontrar no caminho.
 7. **Pagamentos:** adaptador para provedor online selecionado e fluxo manual de Pix; confirmação via webhook assinado para provedor, confirmação administrativa para Pix manual e operações idempotentes.
+8. **SEO técnico:** camada compartilhada `packages/seo` com `@nuxtjs/seo`, configuração de domínio/idioma e metadados da página pública; páginas de autenticação e administração não são indexáveis.
 
 A localização do casal vem do dispositivo operador; o visitante não precisa compartilhar sua própria localização para consultar o mapa. A Geolocation API depende de contexto seguro (HTTPS) e permissão explícita do usuário. A atualização contínua usa `watchPosition`, mas o comportamento em segundo plano varia conforme navegador e sistema; isso é uma limitação central do produto web e precisa ser testada em campo. Consulte [MDN — Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) e [MDN — watchPosition](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition).
 
@@ -172,6 +177,7 @@ A localização do casal vem do dispositivo operador; o visitante não precisa c
 **MVP — Encontrar o casal**
 
 - Página pública mobile-first com estado e mapa da última localização compartilhada.
+- SEO técnico básico para a página pública, com URL canônica, metadados sociais, `robots.txt` e `sitemap.xml`; rotas privadas e de administração fora do índice.
 - Modo operador autenticado para iniciar/pausar compartilhamento.
 - Perfil com descrição e produtos principais.
 - Agenda editável de paradas e microfestas.

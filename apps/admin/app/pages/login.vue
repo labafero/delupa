@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Database } from '@delupa/database/types'
 
-import { resolveAppReturnPath } from '@delupa/auth'
+import { getPasswordRecoveryRedirect, resolveAppReturnPath } from '@delupa/auth'
 
 const route = useRoute()
 const supabase = useSupabaseClient<Database>()
@@ -9,11 +9,31 @@ const webUrl = useRuntimeConfig().public.webUrl
 const email = ref('')
 const password = ref('')
 const message = ref('')
+const messageKind = ref<'error' | 'info'>('error')
 const pending = ref(false)
+
+async function recoverPassword() {
+  if (!email.value.trim()) {
+    message.value = 'Informe seu e-mail para receber o link de definição de senha.'
+    return
+  }
+
+  pending.value = true
+  message.value = ''
+  const { error } = await supabase.auth.resetPasswordForEmail(email.value.trim(), {
+    redirectTo: getPasswordRecoveryRedirect(window.location.origin)
+  })
+  pending.value = false
+  messageKind.value = error ? 'error' : 'info'
+  message.value = error
+    ? 'Não foi possível enviar o link. Confira o e-mail e tente novamente.'
+    : 'Se este e-mail tiver acesso ao painel, enviaremos um link para definir ou redefinir a senha.'
+}
 
 async function login() {
   pending.value = true
   message.value = ''
+  messageKind.value = 'error'
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.value.trim(),
     password: password.value
@@ -84,7 +104,7 @@ async function login() {
         <p
           v-if="message"
           class="form-message"
-          data-kind="error"
+          :data-kind="messageKind"
           role="alert"
         >
           {{ message }}
@@ -94,6 +114,14 @@ async function login() {
           :disabled="pending"
         >
           {{ pending ? 'Entrando…' : 'Entrar' }}
+        </button>
+        <button
+          class="button-link"
+          type="button"
+          :disabled="pending"
+          @click="recoverPassword"
+        >
+          Esqueci ou ainda não defini minha senha
         </button>
       </form>
       <p class="muted"><a :href="webUrl">Ir para a loja</a></p>

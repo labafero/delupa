@@ -1,0 +1,8 @@
+{
+  "name": "@delupa/seo",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@nuxtjs/seo": "^5.3.16"
+  }
+}

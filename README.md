@@ -26,7 +26,7 @@ Os apps rodam em `http://localhost:3000` e `http://localhost:3001`. `pnpm supaba
 
 ## Acesso administrativo
 
-O cadastro público cria apenas usuários `client`. Para promover uma conta existente, confirme primeiro que o e-mail já pertence à pessoa autorizada e execute no SQL Editor do Supabase:
+O cadastro público cria apenas usuários `client`. Convites e recuperação de senha levam a uma tela do app para definir uma senha; não é preciso editar credenciais no painel do Supabase. Para promover uma conta existente, confirme primeiro que o e-mail já pertence à pessoa autorizada e execute no SQL Editor do Supabase:
 
 ```sql
 UPDATE public.user_roles AS roles
@@ -37,6 +37,12 @@ WHERE roles.user_id = users.id
 ```
 
 O custo de aquisição dos produtos fica em `product_private`, separado do catálogo público. Pedidos são criados pelo painel, guardam snapshots dos itens e têm histórico de status; checkout e reserva de estoque ainda não estão habilitados.
+
+## SEO e indexação
+
+O app público estende `packages/seo`, baseado em `@nuxtjs/seo`, como no monorepo VPN. O site define URL canônica, título, descrição em pt-BR, metadados Open Graph/Twitter, `robots.txt` e `sitemap.xml`. Só páginas públicas devem ser indexáveis; login, cadastro, conta, callback e definição de senha são excluídos do índice e do sitemap. O app administrativo envia `noindex, nofollow` em todas as rotas.
+
+Em desenvolvimento e em previews, a configuração do site desativa indexação para evitar duplicatas. Depois de iniciar `pnpm dev:web`, confira `/robots.txt`, `/sitemap.xml` e as tags de `<head>` da página inicial. O domínio de produção é `https://delupa.labafero.com`.
 
 Verificações disponíveis:
 

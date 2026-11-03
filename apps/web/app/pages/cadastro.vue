@@ -3,6 +3,8 @@ import type { Database } from '@delupa/database/types'
 
 import { resolveAppReturnPath } from '@delupa/auth'
 
+useSeoMeta({ title: 'Criar conta | Delupa', robots: 'noindex, nofollow' })
+
 const route = useRoute()
 const supabase = useSupabaseClient<Database>()
 const email = ref('')

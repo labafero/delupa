@@ -4,7 +4,7 @@ Seguimos uma pirâmide: muitos testes unitários, alguns testes de integração 
 
 ## Unitários
 
-`pnpm test` executa Vitest para regras puras, como papéis, caminhos de retorno, conversão de valores e o fluxo de persistência de produtos. Rode `pnpm exec vitest` para manter o runner em modo watch. Esses testes não exigem Supabase nem navegador.
+`pnpm test` executa Vitest para regras puras, como papéis, caminhos de retorno, redirecionamento de recuperação de senha, conversão de valores e o fluxo de persistência de produtos. Rode `pnpm exec vitest` para manter o runner em modo watch. Esses testes não exigem Supabase nem navegador.
 
 ## Integração
 
@@ -14,6 +14,6 @@ Para políticas RLS e migrations, use o Supabase local e acrescente testes de ba
 
 ## Ponta a ponta
 
-Os testes Playwright cobrem poucos caminhos críticos no navegador real. Inicie `pnpm dev:admin` em um terminal e rode `pnpm test:e2e` em outro. CI inicia o app e instala Chromium automaticamente antes dessa etapa.
+Os testes Playwright cobrem poucos caminhos críticos no navegador real, incluindo metadados da página pública, entrada/recuperação de senha e `noindex` do painel. Inicie `pnpm dev:web` e `pnpm dev:admin` em terminais separados; em seguida rode `pnpm test:e2e`. CI inicia os dois apps e instala Chromium automaticamente antes dessa etapa.
 
 Quando adicionar cobertura, prefira testar regras na camada mais rápida que represente o comportamento. Reserve E2E para fluxos que dependem da integração entre tela, roteamento e navegador.

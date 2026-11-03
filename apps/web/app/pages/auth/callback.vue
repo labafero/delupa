@@ -11,6 +11,7 @@ onMounted(async () => {
   const code = typeof route.query.code === 'string' ? route.query.code : null
   const tokenHash = typeof route.query.token_hash === 'string' ? route.query.token_hash : null
   const fragment = new URLSearchParams(window.location.hash.slice(1))
+  const authType = route.query.type || fragment.get('type')
   const fragmentError = fragment.get('error_description') || fragment.get('error')
 
   if (code) {
@@ -20,7 +21,7 @@ onMounted(async () => {
       return
     }
   } else if (tokenHash) {
-    const type = route.query.type === 'invite' ? 'invite' : 'email'
+    const type = authType === 'recovery' ? 'recovery' : authType === 'invite' ? 'invite' : 'email'
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
     if (error) {
       errorMessage.value = 'O link expirou ou já foi usado. Solicite um novo link por e-mail.'
@@ -51,7 +52,8 @@ onMounted(async () => {
     }
   }
 
-  await navigateTo(resolveAppReturnPath(route.query.next, '/minha-conta'))
+  const fallbackPath = authType === 'invite' ? '/definir-senha' : '/minha-conta'
+  await navigateTo(resolveAppReturnPath(route.query.next, fallbackPath))
 })
 </script>
 

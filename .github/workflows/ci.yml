@@ -45,6 +45,20 @@ jobs:
           done
           cat /tmp/delupa-admin.log
           exit 1
+      - name: Start public app for browser tests
+        run: |
+          NUXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54331 \
+            NUXT_PUBLIC_SUPABASE_KEY=test-anon-key \
+            pnpm --filter @delupa/web exec nuxt dev --port 3000 --host 0.0.0.0 --dotenv false \
+            > /tmp/delupa-web.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/delupa-web.log
+          exit 1
       - name: End-to-end tests
         run: pnpm test:e2e
       - name: Lint
