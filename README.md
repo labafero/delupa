@@ -22,7 +22,21 @@ pnpm dev:web
 pnpm dev:admin
 ```
 
-Os apps rodam em `http://localhost:3000` e `http://localhost:3001`. `pnpm supabase:env` copia somente a URL e a chave pública da stack local para os arquivos `.env` ignorados pelo Git. Cadastre os mesmos domínios locais e de produção nas configurações de redirect do Supabase Auth quando o fluxo de autenticação for implementado.
+Os apps rodam em `http://localhost:3000` e `http://localhost:3001`. `pnpm supabase:env` copia somente a URL e a chave pública da stack local para os arquivos `.env` ignorados pelo Git. Os callbacks locais e de produção já estão listados em `supabase/config.toml`.
+
+## Acesso administrativo
+
+O cadastro público cria apenas usuários `client`. Para promover uma conta existente, confirme primeiro que o e-mail já pertence à pessoa autorizada e execute no SQL Editor do Supabase:
+
+```sql
+UPDATE public.user_roles AS roles
+SET role = 'admin'
+FROM auth.users AS users
+WHERE roles.user_id = users.id
+  AND lower(users.email) = lower('admin@example.com');
+```
+
+O custo de aquisição dos produtos fica em `product_private`, separado do catálogo público. Pedidos são criados pelo painel, guardam snapshots dos itens e têm histórico de status; checkout e reserva de estoque ainda não estão habilitados.
 
 Verificações disponíveis:
 

@@ -11,6 +11,8 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@delupa/auth": "workspace:*",
+    "@delupa/database": "workspace:*",
     "@nuxtjs/supabase": "catalog:",
     "nuxt": "catalog:"
   },

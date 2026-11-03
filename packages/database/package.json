@@ -1,0 +1,8 @@
+{
+  "name": "@delupa/database",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": "./src/database.types.ts"
+  }
+}
