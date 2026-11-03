@@ -27,6 +27,23 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm test
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Start admin app for browser tests
+        run: |
+          pnpm dev:admin > /tmp/delupa-admin.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3001/login > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/delupa-admin.log
+          exit 1
+      - name: End-to-end tests
+        run: pnpm test:e2e
       - name: Lint
         run: pnpm lint
       - name: Formatting

@@ -9,6 +9,9 @@
     "lint": "pnpm --recursive --if-present lint",
     "format": "prettier --write \"**/*.{vue,ts,js,mjs,cjs,json,css,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{vue,ts,js,mjs,cjs,json,css,yml,yaml}\"",
+    "test": "vitest run && pnpm --filter @delupa/admin test:integration",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "typecheck": "pnpm --recursive --if-present typecheck",
     "build": "pnpm --workspace-concurrency=1 --recursive --if-present build",
     "supabase:start": "supabase start",
@@ -16,8 +19,10 @@
     "supabase:stop": "supabase stop --no-backup"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.8.3",
-    "supabase": "catalog:"
+    "supabase": "catalog:",
+    "vitest": "^5.1.0"
   }
 }

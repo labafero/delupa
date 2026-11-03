@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Database } from '@delupa/database/types'
+import { moneyToCents, saveProduct as saveProductWorkflow } from '../utils/save-product'
 
 type Product = {
   id: string
@@ -27,6 +28,7 @@ const status = ref<'active' | 'archived'>('active')
 const image = ref<File | null>(null)
 const message = ref('')
 const pending = ref(false)
+const savingStep = ref('')
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 async function loadProducts() {
@@ -75,64 +77,53 @@ async function editProduct(product: Product) {
 
 async function saveProduct() {
   message.value = ''
-  pending.value = true
-  let imagePath = selectedId.value
+  const imagePath = selectedId.value
     ? products.value.find((product) => product.id === selectedId.value)?.image_path || null
     : null
-
-  if (image.value) {
-    const path = `${crypto.randomUUID()}/${Date.now()}-${image.value.name.replace(/[^\w.-]/g, '-')}`
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(path, image.value, { upsert: false })
-    if (uploadError) {
-      message.value = 'Não foi possível enviar a foto.'
-      pending.value = false
-      return
+  message.value = await saveProductWorkflow(
+    {
+      selectedId: selectedId.value,
+      image: image.value,
+      acquisitionCostCents: moneyToCents(cost.value),
+      values: {
+        name: name.value.trim(),
+        description: description.value.trim(),
+        price_cents: moneyToCents(price.value),
+        unit: unit.value.trim(),
+        quantity_available: Number(stock.value),
+        online_limit: Number(limit.value),
+        image_path: imagePath,
+        status: status.value
+      }
+    },
+    {
+      setPending: (value) => (pending.value = value),
+      setStep: (value) => (savingStep.value = value),
+      uploadImage: async (file) => {
+        const path = `${crypto.randomUUID()}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '-')}`
+        const { error } = await supabase.storage
+          .from('product-images')
+          .upload(path, file, { upsert: false })
+        return { data: error ? null : path, error }
+      },
+      saveProduct: async (id, values) => {
+        const result = id
+          ? await supabase.from('products').update(values).eq('id', id).select('id').single()
+          : await supabase.from('products').insert(values).select('id').single()
+        return { data: result.data, error: result.error }
+      },
+      saveCost: async (id, amount) => {
+        const { data, error } = await supabase.from('product_private').upsert({
+          product_id: id,
+          acquisition_cost_cents: amount
+        })
+        return { data, error }
+      },
+      resetForm,
+      reloadProducts: loadProducts,
+      onException: (error) => console.error('Falha ao salvar produto no painel Delupa', error)
     }
-    imagePath = path
-  }
-
-  const productValues = {
-    name: name.value.trim(),
-    description: description.value.trim(),
-    price_cents: Math.round(Number(price.value.replace(',', '.')) * 100),
-    unit: unit.value.trim(),
-    quantity_available: Number(stock.value),
-    online_limit: Number(limit.value),
-    image_path: imagePath,
-    status: status.value
-  }
-
-  const result = selectedId.value
-    ? await supabase
-        .from('products')
-        .update(productValues)
-        .eq('id', selectedId.value)
-        .select('id')
-        .single()
-    : await supabase.from('products').insert(productValues).select('id').single()
-
-  if (result.error || !result.data) {
-    message.value = 'Não foi possível salvar o produto. Verifique os valores informados.'
-    pending.value = false
-    return
-  }
-
-  const productId = result.data.id
-  const { error: costError } = await supabase.from('product_private').upsert({
-    product_id: productId,
-    acquisition_cost_cents: Math.round(Number(cost.value.replace(',', '.')) * 100)
-  })
-  pending.value = false
-  if (costError) {
-    message.value = 'Produto salvo, mas não foi possível salvar o custo privado.'
-    return
-  }
-
-  message.value = 'Produto salvo.'
-  resetForm()
-  await loadProducts()
+  )
 }
 
 async function archiveProduct(product: Product) {
@@ -264,7 +255,7 @@ onMounted(loadProducts)
               type="submit"
               :disabled="pending"
             >
-              {{ pending ? 'Salvando…' : 'Salvar produto' }}
+              {{ pending ? `${savingStep}…` : 'Salvar produto' }}
             </button>
             <button
               v-if="selectedId"

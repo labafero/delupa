@@ -5,6 +5,8 @@ node_modules/
 .nuxt/
 .output/
 dist/
+playwright-report/
+test-results/
 
 # Local configuration and credentials
 .env
