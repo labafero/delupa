@@ -1,0 +1,23 @@
+{
+  "name": "@delupa/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --port 3000 --dotenv .env",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare --dotenv false",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxtjs/supabase": "catalog:",
+    "nuxt": "catalog:"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}
