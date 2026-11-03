@@ -163,9 +163,13 @@ site_url = "https://delupa.labafero.com"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
   "http://localhost:3000/auth/callback",
+  "http://localhost:3000/auth/callback?next=%2Fdefinir-senha",
   "http://localhost:3001/auth/callback",
+  "http://localhost:3001/auth/callback?next=%2Fdefinir-senha",
   "https://delupa.labafero.com/auth/callback",
-  "https://admin.delupa.labafero.com/auth/callback"
+  "https://delupa.labafero.com/auth/callback?next=%2Fdefinir-senha",
+  "https://admin.delupa.labafero.com/auth/callback",
+  "https://admin.delupa.labafero.com/auth/callback?next=%2Fdefinir-senha"
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
