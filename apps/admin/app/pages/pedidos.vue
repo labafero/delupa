@@ -6,12 +6,14 @@ type Product = { id: string; name: string; unit: string; price_cents: number; st
 type Order = {
   id: string
   customer_id: string
+  customer_email: string
   pickup_code: string
   status: Database['public']['Enums']['order_status']
   payment_method: Database['public']['Enums']['order_payment_method']
   payment_status: Database['public']['Enums']['order_payment_status']
   fulfillment: Database['public']['Enums']['order_fulfillment']
   delivery_address: string | null
+  pickup_location: string | null
   delivery_instructions: string | null
   total_cents: number
   created_at: string
@@ -33,7 +35,7 @@ const orders = ref<Order[]>([])
 const customerId = ref('')
 const fulfillment = ref<'delivery' | 'pickup'>('pickup')
 const paymentMethod = ref<Database['public']['Enums']['order_payment_method']>('manual_pix')
-const deliveryAddress = ref('')
+const fulfillmentLocation = ref('')
 const instructions = ref('')
 const quantities = ref<Record<string, number>>({})
 const message = ref('')
@@ -55,6 +57,15 @@ const paymentMethods: Record<string, string> = {
   cash_at_pickup: 'Dinheiro na retirada'
 }
 
+watch(fulfillment, (value) => {
+  if (value === 'delivery' && paymentMethod.value === 'cash_at_pickup') {
+    paymentMethod.value = 'manual_pix'
+  }
+  if (value === 'pickup' && paymentMethod.value === 'cash_at_delivery') {
+    paymentMethod.value = 'manual_pix'
+  }
+})
+
 async function loadOrders() {
   const { data, error } = await supabase
     .from('orders')
@@ -67,19 +78,14 @@ async function loadOrders() {
   }
   const records = (data || []) as Order[]
   const ids = records.map((order) => order.id)
-  const customerIds = [...new Set(records.map((order) => order.customer_id))]
-  const [{ data: items }, { data: customers }] = await Promise.all([
-    ids.length
-      ? supabase.from('order_items').select('*').in('order_id', ids)
-      : Promise.resolve({ data: [] }),
-    customerIds.length
-      ? supabase.from('profiles').select('user_id,email').in('user_id', customerIds)
-      : Promise.resolve({ data: [] })
-  ])
-  const emailById = new Map((customers || []).map((profile) => [profile.user_id, profile.email]))
+  let items: Database['public']['Tables']['order_items']['Row'][] = []
+  if (ids.length) {
+    const { data: itemData } = await supabase.from('order_items').select('*').in('order_id', ids)
+    items = itemData || []
+  }
   orders.value = records.map((order) => ({
     ...order,
-    email: emailById.get(order.customer_id) || 'Cliente',
+    email: order.customer_email,
     items: (items || []).filter((item) => item.order_id === order.id)
   }))
 }
@@ -103,12 +109,9 @@ async function createOrder() {
   const items = Object.entries(quantities.value)
     .filter(([, quantity]) => Number(quantity) > 0)
     .map(([product_id, quantity]) => ({ product_id, quantity: Number(quantity) }))
-  if (
-    !customerId.value ||
-    items.length === 0 ||
-    (fulfillment.value === 'delivery' && !deliveryAddress.value.trim())
-  ) {
-    message.value = 'Escolha um cliente, ao menos um produto e preencha o endereço para entrega.'
+  if (!customerId.value || items.length === 0 || !fulfillmentLocation.value.trim()) {
+    message.value =
+      'Escolha um cliente, ao menos um produto e informe o endereço ou local combinado.'
     return
   }
 
@@ -117,7 +120,7 @@ async function createOrder() {
     p_customer_id: customerId.value,
     p_fulfillment: fulfillment.value,
     p_payment_method: paymentMethod.value,
-    p_delivery_address: deliveryAddress.value,
+    p_fulfillment_location: fulfillmentLocation.value,
     p_delivery_instructions: instructions.value,
     p_items: items
   })
@@ -127,7 +130,7 @@ async function createOrder() {
     return
   }
   message.value = 'Pedido criado com preços e nomes registrados no momento do pedido.'
-  deliveryAddress.value = ''
+  fulfillmentLocation.value = ''
   instructions.value = ''
   quantities.value = Object.fromEntries(products.value.map((product) => [product.id, 0]))
   await loadOrders()
@@ -211,25 +214,31 @@ onMounted(async () => {
               Pagamento
               <select v-model="paymentMethod">
                 <option value="manual_pix">Pix manual</option>
-                <option value="cash_at_pickup">Dinheiro na retirada</option>
-                <option value="cash_at_delivery">Dinheiro na entrega</option>
+                <option
+                  v-if="fulfillment === 'pickup'"
+                  value="cash_at_pickup"
+                >
+                  Dinheiro na retirada
+                </option>
+                <option
+                  v-if="fulfillment === 'delivery'"
+                  value="cash_at_delivery"
+                >
+                  Dinheiro na entrega
+                </option>
               </select>
             </label>
-            <label
-              v-if="fulfillment === 'delivery'"
-              class="form-field"
-            >
-              Endereço de entrega
+            <label class="form-field">
+              {{
+                fulfillment === 'delivery' ? 'Endereço de entrega' : 'Local combinado para retirada'
+              }}
               <input
-                v-model="deliveryAddress"
+                v-model="fulfillmentLocation"
                 required
               />
             </label>
-            <label
-              v-if="fulfillment === 'delivery'"
-              class="form-field"
-            >
-              Instruções de entrega
+            <label class="form-field">
+              {{ fulfillment === 'delivery' ? 'Instruções de entrega' : 'Observações do local' }}
               <input v-model="instructions" />
             </label>
           </div>
@@ -306,9 +315,11 @@ onMounted(async () => {
                 {{ money.format(item.line_total_cents / 100) }}
               </li>
             </ul>
-            <p v-if="order.delivery_address">
-              <strong>Endereço:</strong>
-              {{ order.delivery_address }}
+            <p v-if="order.delivery_address || order.pickup_location">
+              <strong>
+                {{ order.fulfillment === 'delivery' ? 'Endereço:' : 'Local combinado:' }}
+              </strong>
+              {{ order.delivery_address || order.pickup_location }}
               <span v-if="order.delivery_instructions">· {{ order.delivery_instructions }}</span>
             </p>
             <div class="form-grid">

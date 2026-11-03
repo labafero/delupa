@@ -11,6 +11,8 @@ const orders = ref<
     status: string
     payment_status: string
     fulfillment: string
+    delivery_address: string | null
+    pickup_location: string | null
     total_cents: number
     pickup_code: string
     created_at: string
@@ -90,6 +92,9 @@ async function signOut() {
           <p>
             {{ order.fulfillment === 'delivery' ? 'Entrega' : 'Retirada / encontro' }} · Código
             {{ order.pickup_code }}
+          </p>
+          <p v-if="order.delivery_address || order.pickup_location">
+            {{ order.delivery_address || order.pickup_location }}
           </p>
           <ul>
             <li

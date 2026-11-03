@@ -53,12 +53,14 @@ export type Database = {
         {
           id: string
           customer_id: string
+          customer_email: string
           pickup_code: string
           status: Database['public']['Enums']['order_status']
           payment_method: Database['public']['Enums']['order_payment_method']
           payment_status: Database['public']['Enums']['order_payment_status']
           fulfillment: Database['public']['Enums']['order_fulfillment']
           delivery_address: string | null
+          pickup_location: string | null
           delivery_instructions: string | null
           total_cents: number
           created_by: string
@@ -68,12 +70,14 @@ export type Database = {
         {
           id?: string
           customer_id: string
+          customer_email: string
           pickup_code?: string
           status?: Database['public']['Enums']['order_status']
           payment_method: Database['public']['Enums']['order_payment_method']
           payment_status?: Database['public']['Enums']['order_payment_status']
           fulfillment: Database['public']['Enums']['order_fulfillment']
           delivery_address?: string | null
+          pickup_location?: string | null
           delivery_instructions?: string | null
           total_cents?: number
           created_by: string
@@ -129,7 +133,7 @@ export type Database = {
           p_customer_id: string
           p_fulfillment: Database['public']['Enums']['order_fulfillment']
           p_payment_method: Database['public']['Enums']['order_payment_method']
-          p_delivery_address: string | null
+          p_fulfillment_location: string
           p_delivery_instructions: string | null
           p_items: { product_id: string; quantity: number }[]
         }
