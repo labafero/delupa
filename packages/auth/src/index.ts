@@ -28,3 +28,13 @@ export function getPasswordRecoveryRedirect(origin: string): string {
   callbackUrl.searchParams.set('next', '/definir-senha')
   return callbackUrl.toString()
 }
+
+export function getPasswordRecoveryErrorMessage(
+  error: { status?: number; code?: string } | null
+): string {
+  if (error?.status === 429 || error?.code === 'over_email_send_rate_limit') {
+    return 'O limite de envio de e-mails foi atingido. Aguarde até uma hora e use o link mais recente enviado.'
+  }
+
+  return 'Não foi possível enviar o link. Confira o e-mail e tente novamente.'
+}

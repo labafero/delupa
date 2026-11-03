@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { Database } from '@delupa/database/types'
 
-import { getPasswordRecoveryRedirect, resolveAppReturnPath } from '@delupa/auth'
+import {
+  getPasswordRecoveryErrorMessage,
+  getPasswordRecoveryRedirect,
+  resolveAppReturnPath
+} from '@delupa/auth'
 
 useSeoMeta({ title: 'Entrar | Delupa', robots: 'noindex, nofollow' })
 
@@ -46,6 +50,8 @@ async function login() {
 }
 
 async function recoverPassword() {
+  if (pending.value) return
+
   if (!email.value.trim()) {
     messageKind.value = 'error'
     message.value = 'Informe seu e-mail para receber o link de definição de senha.'
@@ -60,7 +66,7 @@ async function recoverPassword() {
   pending.value = false
   messageKind.value = error ? 'error' : 'info'
   message.value = error
-    ? 'Não foi possível enviar o link. Confira o e-mail e tente novamente.'
+    ? getPasswordRecoveryErrorMessage(error)
     : 'Se este e-mail tiver uma conta, enviaremos um link para definir ou redefinir a senha.'
 }
 </script>

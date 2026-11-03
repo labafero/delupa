@@ -30,7 +30,7 @@ Os apps rodam em `http://localhost:3000` e `http://localhost:3001`. `pnpm supaba
 
 ## Acesso administrativo
 
-O cadastro público cria apenas usuários `client`. Convites e recuperação de senha levam a uma tela do app para definir uma senha; não é preciso editar credenciais no painel do Supabase. Para promover uma conta existente, confirme primeiro que o e-mail já pertence à pessoa autorizada e execute no SQL Editor do Supabase:
+O cadastro público cria apenas usuários `client`. Convites e recuperação de senha levam a uma tela do app para definir uma senha; não é preciso editar credenciais no painel do Supabase. O envio padrão do Supabase é limitado a 2 e-mails por hora; para uso contínuo, configure SMTP próprio. Para promover uma conta existente, confirme primeiro que o e-mail já pertence à pessoa autorizada e execute no SQL Editor do Supabase:
 
 ```sql
 UPDATE public.user_roles AS roles
