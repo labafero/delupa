@@ -10,6 +10,10 @@ Monorepo Nuxt do Casal de Lupa.
 
 Cada app é um projeto Vercel separado, ligado ao mesmo repositório e configurado com `apps/web` ou `apps/admin` como diretório raiz. Associe `delupa.labafero.com` ao projeto público e `admin.delupa.labafero.com` ao projeto admin. As duas aplicações usam o mesmo projeto Supabase; autorização deve ser aplicada no backend com políticas RLS.
 
+## Localização do casal
+
+O mapa público deve mostrar simultaneamente dois pins, um para cada integrante. Com o compartilhamento ativo, cada dispositivo sincroniza sua posição automaticamente a cada 5 minutos; cada operador também pode sincronizar imediatamente pelo `/admin`. O mapa identifica cada pin e mostra seu horário de atualização. Após 10 minutos sem sincronização, a posição é marcada como desatualizada.
+
 ## Desenvolvimento local
 
 Requisitos: Node.js 24, pnpm 11.1.3 e Docker compatível com a Supabase CLI.

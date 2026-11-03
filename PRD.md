@@ -33,15 +33,16 @@
 
 ### User Stories e Acceptance Criteria
 
-#### História 1 — Encontrar o casal agora
+#### História 1 — Encontrar as duas pessoas agora
 
-**Como** pessoa na praia, **quero** ver a última localização pública do casal num mapa, **para** decidir como chegar até eles.
+**Como** pessoa na praia, **quero** ver a última localização pública de cada integrante num mapa, **para** decidir como chegar até eles.
 
-- O mapa mostra a última posição recebida, o horário da atualização e um estado textual: “ao vivo”, “atualizando” ou “localização pausada/desatualizada”.
-- Com localização ativa e conexão funcional, a posição é atualizada automaticamente; o critério de latência do piloto é p90 ≤ 30 s entre envio recebido pelo serviço e exibição no cliente.
-- Se não chegar uma atualização por 2 minutos, a interface deixa de sugerir que a posição está ao vivo e mostra a hora da última posição. O limite é configurável e será ajustado no piloto.
+- O mapa mostra simultaneamente dois pins, um por integrante do casal, com identificação e horário da última sincronização de cada um.
+- Com compartilhamento ativo, cada dispositivo sincroniza sua posição automaticamente a cada 5 minutos; cada integrante também pode forçar uma sincronização imediata no `/admin`.
+- Com conexão funcional, uma posição enviada deve aparecer ao público em até 30 segundos (p90 no piloto); esse prazo mede a entrega após o envio, não a frequência de sincronização.
+- Após 10 minutos sem sincronização de um pin, a interface deixa de indicá-lo como atual e mostra o horário da última posição. O limite equivale a duas janelas automáticas e pode ser ajustado no piloto.
 - Se o compartilhamento estiver pausado ou a posição estiver indisponível, o app não inventa uma posição atual; pode mostrar a próxima parada publicada na agenda.
-- A página continua utilizável sem permissão de localização do visitante; localização do casal é publicada pelos dispositivos dos operadores.
+- A página continua utilizável sem permissão de localização do visitante; cada integrante publica a própria posição pelo seu dispositivo de operador.
 
 #### História 2 — Publicar e pausar a localização
 
@@ -49,8 +50,10 @@
 
 - O modo operador exige autenticação.
 - O app explica por que solicita localização e solicita permissão do navegador apenas quando o operador inicia o compartilhamento.
-- Há um controle visível para iniciar/pausar e confirmação visual de estado; não há compartilhamento público antes de uma ação explícita de início.
-- Ao pausar, novas coordenadas deixam de ser exibidas como atuais. A política para apagar ou manter a última posição deve ser confirmada antes do lançamento; comportamento provisório recomendado: ocultar o pin atual e reter apenas a agenda publicada.
+- Há controles visíveis para iniciar/pausar e sincronizar agora, com confirmação visual do estado e da última sincronização; não há compartilhamento público antes de uma ação explícita de início.
+- Cada sessão/dispositivo de operador publica um pin próprio; pausar um integrante não apaga nem pausa automaticamente o pin do outro.
+- Enquanto ativo, o dispositivo tenta sincronizar a cada 5 minutos, além de permitir envio manual imediato no `/admin`.
+- Ao pausar, novas coordenadas deixam de ser exibidas como atuais. A política para apagar ou manter a última posição deve ser confirmada antes do lançamento; comportamento provisório recomendado: manter o pin como última posição, com estado pausado e horário visível.
 - Erros de permissão, GPS, conexão ou bateria apresentam estado recuperável e opção de publicar manualmente uma parada/área aproximada.
 - O fluxo informa que o navegador pode interromper atualizações em segundo plano; o operador deve manter o modo ativo aberto durante o uso. Compatibilidade real deve ser validada em aparelhos e navegadores escolhidos.
 
@@ -141,7 +144,7 @@ Proposta lógica: monorepo Nuxt com duas aplicações e módulos compartilhados;
 2. **`apps/admin`:** Nuxt autenticado para localização, agenda, CRUD de produtos, consulta/atualização de pedidos, pagamentos e entrega.
 3. **Módulos compartilhados:** tipos, validações, componentes e regras de domínio comuns às duas aplicações, sem duplicar regras de preço, limite e reserva.
 4. **API/backend:** autenticação, autorização, localização, agenda, catálogo, carrinho, bloqueio temporário de estoque, pedidos e estados de pagamento; canal em tempo real para atualizações de localização.
-5. **Persistência:** posição mais recente, perfil/agenda, produtos, estoque, carrinhos com expiração, pedidos e histórico mínimo operacional. Histórico de trilha GPS não é requisito.
+5. **Persistência:** última posição e horário de sincronização por integrante, perfil/agenda, produtos, estoque, carrinhos com expiração, pedidos e histórico mínimo operacional. Histórico de trilha GPS não é requisito.
 6. **Mapa:** camada OpenStreetMap ou baseada em dados OSM para ilustração; o pin pode abrir aplicativo de mapas nativo ou Google Maps. A navegação é opcional, pois cliente e casal podem se encontrar no caminho.
 7. **Pagamentos:** adaptador para provedor online selecionado e fluxo manual de Pix; confirmação via webhook assinado para provedor, confirmação administrativa para Pix manual e operações idempotentes.
 8. **SEO técnico:** camada compartilhada `packages/seo` com `@nuxtjs/seo`, configuração de domínio/idioma e metadados da página pública; páginas de autenticação e administração não são indexáveis.
@@ -176,7 +179,8 @@ A localização do casal vem do dispositivo operador; o visitante não precisa c
 
 **MVP — Encontrar o casal**
 
-- Página pública mobile-first com estado e mapa da última localização compartilhada.
+- Página pública mobile-first com mapa exibindo simultaneamente o pin individual de cada integrante, horários e estado de atualização.
+- Sincronização automática da posição a cada 5 minutos por dispositivo, com ação manual de sincronização imediata no `/admin`.
 - SEO técnico básico para a página pública, com URL canônica, metadados sociais, `robots.txt` e `sitemap.xml`; rotas privadas e de administração fora do índice.
 - Modo operador autenticado para iniciar/pausar compartilhamento.
 - Perfil com descrição e produtos principais.
